@@ -10,6 +10,7 @@ const int Z = 19;
 //limit switch pins
 const int leftLimitPin = 18;
 const int rightLimitPin = 19;
+
 //Stepper motor pins
 const int dirPin = 25;
 const int steppin = 26;
@@ -27,79 +28,45 @@ bool atLimit = false;
 int lastCount = -2000;
 
 void setup() {
-  //sets PAO PA4 (step, dir, m0, ml, m2) to Outputs
-  DDRA B11111111;
-
-  pinMode(leftLimitPin, INPUT);
-  pinMode(rightLimitPin, INPUT);
-
-
   // put your setup code here, to run once:
-
+  
   //pinMode (ISR_FOR_ENCODER_B, INPUT);
   //pinMode (A, INPUT);
   //pinMode (Z, INPUT);
   DDRD & B11111000; //direction register for Port A (some range of arduino digital pins); 0 = input, 1 = output... faster
-  digitalWrite(leftl itPin, HI
+  
+  //sets PAO PA4 (step, dir, m0, ml, m2) to Outputs
+  DDRA = B11111111;
+
+  pinMode(leftLimitPin, INPUT);
+  pinMode(rightLimitPin, INPUT);
+  
+  digitalWrite(leftLimitPin, HIGH);
   digitalWrite(rightLimitPin, HIGH);
+
   digitalWrite (A, HIGH);
   digitalWrite (ISR_FOR_ENCODER_B, HIGH);
   digitalWrite (Z, HIGH);
   //PORTD |=B00000111; //digitalWrites to high but faster
+  
   PORTA & B00000000;
 
-encodVal = 12;
-}else if (rncount <= -6) {
-
-encodVal = 0;
-}else{
-}
-
-PORTA & B11111000;
-switch (encodval) { //SETS STEP SIZE
-case 6 //NOSTEP THOUGH
-encodVal + rncount;
-case 5:
-case 7:
-case 4:
-case 8 :
-case 3:
-case 9:
-}
-}
-//SETS DIRECTION
-case 2:
-case 10:
-return; // and exits the switch
-break;
-PORTA | B00000101;
-break;
-PORTA | B00000100;
-break;
-}else{
-PORTA | B00000011;
-break;
-PORTA | B00000010;
-break;
-case 1:
-case 11: PORTA | B00000001;
-//PORTA |= B00000001;
-break;
-case 0:
-case 12 : PORTA | B00000001;
-//PORTA |=B00000000;
-break;
-if (encodVal > 6){
-PORTA | B00001000;
-//STEP
-
- delay (stepPulseWidth);
- PORTA & B11101111;
- delay (stepPulseWidth);
-}
-PORTA & B11110111;
-PORTA | B00010000;
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 // PAGE 3
 
 PORTA & B00000000;
@@ -143,6 +110,87 @@ encodVal = 12;
 encodVal = 0;
 
 //******************
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  if(){
+    encodVal = 12;
+  }else if (rncount <= -6) {
+    encodVal = 0;
+  }else{
+    encodVal += rncount;  
+  }
+  PORTA & B11111000;
+  switch (encodval) { //SETS STEP SIZE
+    case 6 //NOSTEP THOUGH
+      return; // and exits the switch
+      break;
+    case 5:
+    case 7:
+      PORTA | B00000101;
+      break;
+    case 4:
+    case 8:
+      PORTA | B00000100;
+      break;
+    case 3:
+    case 9:
+      PORTA | B00000011;
+      break;
+    case 2:
+    case 10:
+      PORTA | B00000010;
+      break;
+    case 1:
+    case 11: 
+      PORTA | B00000001;
+      //PORTA |= B00000001;
+      break;
+    case 0:
+    case 12: 
+      PORTA | B00000001;
+      //PORTA |=B00000000;
+      break;
+  }
+
+  //SETS DIRECTION
+  if (encodVal > 6){
+    PORTA |= B00001000;
+  }else{
+    PORTA &= B11110111;
+  }
+
+  //STEP
+  PORTA |= B00010000;
+  delay (stepPulseWidth);
+  PORTA &= B11101111;
+  delay (stepPulseWidth);
+}
 
 // PAGE 4
 
