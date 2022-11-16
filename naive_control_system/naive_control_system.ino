@@ -51,94 +51,52 @@ void setup() {
   
   PORTA & B00000000;
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-// PAGE 3
+  //&= is for setting 0
+  // is for setting 1
 
-PORTA & B00000000;
-//&= is for setting 0
-// is for setting 1
-digitalWrite (26, LOW);
-attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER_B), isrB, CHANGE);
-attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER B), isrA, CHANGE);
-attachInterrupt (digitalPinToInterrupt (leftLimitPin), isrLimit, CHANGE);
-attachInterrupt (digitalPinToInterrupt (rightLimitPin), isrLimit, CHANGE);
-Serial.begin(250000);
-Serial.println("hi");
-while ((serialAv = Serial.available()) == 0) { }
+  digitalWrite (26, LOW);
+
+  attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER_B), isrB, CHANGE);
+  attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER B), isrA, CHANGE);
+  
+  attachInterrupt (digitalPinToInterrupt (leftLimitPin), isrLimit, CHANGE);
+  attachInterrupt (digitalPinToInterrupt (rightLimitPin), isrLimit, CHANGE);
+  
+  
+  Serial.begin(250000);
+  Serial.println("hi");
+  
+  while ((serialAv = Serial.available()) == 0) { }
 }
+
 void loop() {
-if (Serial.available() != serialAv) {
-return;
-cli(); //notInterrupts()
-}
-// put your main code here, to run repeatedly:
-//LIMIT SWITCHES + ENCODERVAL SET ******
-if (atLimit) {
-return;
-}
-int16_t rncount = count;
-sei (); //interrupts()
-//STEPPER MOTOR ******
-/*uint8_t encodVal = 4;
-if (rncount >= 3){
-encodVal = 7;
-}else if (rncount <= -4){
-encodVal = 0;
-}else{
-}else{
-encodVal + rncount;
-}*/
-uint8_t encodVal = 6;
-if (rncount>= 6) {
-encodVal = 12;
-}else if (rncount <= -6){
-encodVal = 0;
+  
+  if (Serial.available() != serialAv) {
+    return;
+  }
+  
+  // put your main code here, to run repeatedly:
+  //LIMIT SWITCHES + ENCODERVAL SET ******
+  if (atLimit) {
+    return;
+  }
 
-//******************
+  cli(); //notInterrupts()
+  int16_t rncount = count;
+  sei (); //interrupts()
   
+  //STEPPER MOTOR ******
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  if(){
+  /*uint8_t encodVal = 4;
+  if (rncount >= 3){
+    encodVal = 7;
+  }else if (rncount <= -4){
+    encodVal = 0;
+  }else{
+    encodVal + rncount;
+  }*/
+  uint8_t encodVal = 6;
+  if (rncount >= 6) {
     encodVal = 12;
   }else if (rncount <= -6) {
     encodVal = 0;
@@ -192,83 +150,49 @@ encodVal = 0;
   delay (stepPulseWidth);
 }
 
-// PAGE 4
-
-PORTA & B11101111;
- delay (stepPulseWidth);
-}
-
- void isrA() {
- byte a = (PIND & B00000011);
- if (a & B00000001
-if (a
-count += 4000;
-} else if (count > 1999) {
-count -= 4000;
- }
+void isrA() {
+  byte a = (PIND & B00000011);
+  if (a & B00000001 == 1){ // if pin 0 (phase A) goes from low to high
+    if (a == B00000000 || a == B00000011){
+      --count;
+    }else{
+      ++count;
+    }
+  }else{ // phase A goes from high to low
+    if (a == B00000000 || a == B00000011){
+      --count;
+    }else{
+      ++count;
+    }
+  }
+  if (count < -2000) {
+    count += 4000;
+  } else if (count > 1999) {
+    count -= 4000;
+  }
 }
 
 void isrB() {
-}
+  byte b = (PIND & B00000011);
+  if(b & B00000010 == 1){ //if pin 0 (phase B) goes from low to high
+    if (b == B00000000 || b B00000011){
+      ++count;
+    }else{
+      --count;
+    }
+  }else{ // phase B goes from high to low
+    if (b == B00000000 || b == B00000011){
+      ++count;
+    }else{
+      --count;      
+    }
+  }
 
-if (count
-
-count + 4000;
-} else if (count 1999) {
-count -= 4000;
- }
-}
- void isrLimit() {
- atLimit = true;
-==
-} else {
-}
---count;
-1) { //if pin 0 (phase A) goes from low to high
-B00000000 || a == B00000011) {
-++count;
-}
-} else { //phase A goes from high to low
-if (a B00000000 || a == B00000011) {
-} else {
---count;
-}
-++count;
-}
-if (count < -2000) {
-=
-byte b
-if (b & B00000010
-if (b
-(PIND & B00000011);
-1) { //if pin 0 (phase B) goes from low to high
-B00000000 || b B00000011) {
-==
-} else {
-++count;
-==
---count;
-} else {
-} else { //phase B goes from
-if (b ==
-B00000000 || b
-++count;
---count;
-==
--2000) {
-==
-high to low
-B00000011) {
-  ++count;
-}else{
-  --count;
-}
-
-if (count < -2000){
-  count += 4000;
-}else if(count > 1999){
-  count -= 4000;
-}
+  if (count < -2000){
+    count + 4000;
+  } else if (count > 1999) {
+    count -= 4000;
+  }
 }
 
 void isrLimit() {
