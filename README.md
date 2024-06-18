@@ -1,9 +1,9 @@
 *VIDEOS DOWN BELOW! (Consider this statement the hook)*
 
-# [Inverted-Pendulum Project](https://en.wikipedia.org/wiki/Inverted_pendulum)
+# Inverted-Pendulum Project
 
 ## What is an inverted pendulum?
-An inverted pendulum is a dynamic system with the center of mass above its pivot point, generally constrained to one rotational degree of freedom. While a pendulum is stable, inverting a pendulum requires active balancing applied to it. Generally, this is performed by applying torque to the pendulum directly, or shifting the base longitudinally.
+An [inverted pendulum](https://en.wikipedia.org/wiki/Inverted_pendulum) is a dynamic system with the center of mass above its pivot point, generally constrained to one rotational degree of freedom. While a pendulum is stable, inverting a pendulum requires active balancing applied to it. Generally, this is performed by applying torque to the pendulum directly, or shifting the base longitudinally.
 
 ## History of Project
 
