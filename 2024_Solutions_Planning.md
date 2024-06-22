@@ -48,3 +48,11 @@ Here I will plan the technical aspects to ensure readiness and success for on-si
    - However, it will be challenging to ensure generalization. I may need to simulate the environment with a variety of backgrounds, and a particularly colored rod for this to work well. I could also use a colored sheet as the background, but that feels like cheating.
  - Set up a cloud-based GPU training device that can take an image of the environment. This will allow significant speed-ups due to larger batch sizes, and data and model parallelism capability. Therefore, it will be more realistic to retrain within an hour or two. That being said, in my experience, it's unlikely (if the code is not buggy) a task like this will require more than 24 hours of training, which is technically doable locally in the time frame allotted.
  - Modularize the system. Have a few interchangeable components for each module. An example of this would be having a module reponsible for determining the absolute angle of the pendulum. Then, I can build an image-based solution, an encoder-based solution, a naive and model-based approach for both, etc, and trade out these components to get it working.
+   - I like this modular idea, because it allows me to continue progressing on this until the day I leave, without ever leaving much work unfinished.
+
+
+## Advice
+
+ - List out all unknowns.
+ - Don't overparametrize model. If modularization is performed, use best guesses for other dynamics and values.
+ - Know what tools I am familiar with, what they can do, and plan out every tool I will use.
