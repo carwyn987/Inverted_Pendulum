@@ -35,9 +35,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device: ", device)
 
 replay_buffer = ReplayBufferInvPend(buffer_size)
-agent = AgentInvPend(replay_buffer, env)
+agent = AgentInvPend(replay_buffer, env, latency=6)
 behavior_model = Action_Value_Network(observation_shapes, num_actions).to(device)
-behavior_model.load_state_dict(torch.load('preliminary_tests/model_weights/best_min_perturbations_target_dqn.pth'))
+behavior_model.load_state_dict(torch.load('preliminary_tests/model_weights/latency_2_target_dqn.pth'))
 behavior_model.eval()
 
 for step in tqdm(range(max_steps)):

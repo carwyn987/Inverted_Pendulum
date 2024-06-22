@@ -24,6 +24,7 @@ env = gym.make('CartPole-v1',
                init_x_dot=0.0,
                init_theta= 0, # 0, # start in the upwards position
                init_theta_dot=0.0,
+               perturbations=True
             #    render_mode="human",
             #    screen_width=800,
             #    screen_height=400)
@@ -60,7 +61,7 @@ lossfn = nn.MSELoss()
 
 # Initialize the buffer and agent
 replay_buffer = ReplayBufferInvPend(buffer_size)
-agent = AgentInvPend(replay_buffer, env)
+agent = AgentInvPend(replay_buffer, env, latency=2)
 
 # Let's log the returns, and step in episode
 return_save = []
@@ -130,8 +131,8 @@ for step in tqdm(range(max_steps)):
 
 
 # Save the models
-torch.save(behavior_model.state_dict(), 'preliminary_tests/model_weights/behavioral_dqn.pth')
-torch.save(target_model.state_dict(), 'preliminary_tests/model_weights/target_dqn.pth')
+torch.save(behavior_model.state_dict(), 'preliminary_tests/model_weights/latency_2_behavioral_dqn.pth')
+torch.save(target_model.state_dict(), 'preliminary_tests/model_weights/latency_2_target_dqn.pth')
 
 plt.figure()
 plt.title('Episode vs Loss')

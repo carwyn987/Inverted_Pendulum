@@ -34,9 +34,26 @@ class ReplayBufferInvPend:
 
 class AgentInvPend:
 
-    def __init__(self, buffer, environment):
+    """
+    Sets up an inverted pendulum agent to interact with the environment and store experiences in a replay buffer. Includes support for latency.
+
+    Args:
+    --------
+     - buffer (ReplayBufferInvPend): The replay buffer to store experiences
+     - environment (gym.Env): The environment to interact with
+     - latency (int): The number of steps to wait before taking an action
+    """
+    def __init__(self, buffer, environment, latency=0):
         self.env = environment
         self.replay_buffer = buffer
+
+        # Create a deque with max size n for our latency
+        self.latency = latency
+        if self.latency > 0:
+            self.latent_SA_buffer = deque(maxlen=latency)
+        elif self.latency < 0:
+            raise ValueError("Latency must be greater than or equal to 0")
+
         self.restart_episode()
 
     def restart_episode(self):
@@ -55,17 +72,38 @@ class AgentInvPend:
         return action
     
     # This function will advance the state of the environment, and log the results
+    """
+    Args:
+    --------
+     - model (nn.Module): The model to use to choose the action
+     - epsilon (float): The probability of taking a random action
+     - device (str): "cpu" or "cuda"
+     - latency (int): The number of steps to wait before taking an action
+    
+    Returns:
+    --------
+     - done: bool
+    """
     def advance_state_and_log(self, model, epsilon, device="cpu"):
         action = self.choose_epsilon_greedy_action(model,epsilon,device)
-        observation, reward, done, _, info = self.env.step(action.astype(np.float32)) # _ is for truncated
-        self.total_reward += reward
-        observation = observation.astype("float32")
-        action = actionValueToArrayIndex(action)
-
-        # Create a tuple of the experience for the replay buffer
-        sample_tuple = SingleExperience(self.state, action, reward, done, observation)
-        self.replay_buffer.append(sample_tuple)
+        if self.latency == 0:
+            observation, reward, done, _, info = self.env.step(action.astype(np.float32)) # _ is for truncated
+            
+            observation = observation.astype("float32")
+            action = actionValueToArrayIndex(action)
+            sample_tuple = SingleExperience(self.state, action, reward, done, observation)
+        else:
+            self.latent_SA_buffer.append((self.state, action))
+            # If deque is not full, take no action, else get latent state-action pair and execute
+            if len(self.latent_SA_buffer) < self.latency:
+                observation, reward, done, _, info = self.env.step(np.array([0.0],dtype=np.float32))
+            else:
+                observation, reward, done, _, info = self.env.step(self.latent_SA_buffer[0][1].astype(np.float32))
+            
+            sample_tuple = SingleExperience(self.latent_SA_buffer[0][0], actionValueToArrayIndex(self.latent_SA_buffer[0][1]), reward, done, observation.astype("float32"))
         
+        self.total_reward += reward
+        self.replay_buffer.append(sample_tuple)
         self.state = observation
 
         if done:
