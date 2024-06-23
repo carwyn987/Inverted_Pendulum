@@ -27,7 +27,7 @@ Here I will plan the technical aspects to ensure readiness and success for on-si
    - Should I parameterize on intrinsic properties, such as mass of rod, total longitudinal distance, and maximum movement speeds
    - Will training on all of these parameters be prohibited on my local machine (3080ti)?
  - Simulation environment?
-   - Python Gym
+   - Python Gym (now gymnasium)
    - Gazebo (use ROS)?
    - Unreal Engine?
  - How should I format separation of training and inference? Presumably have a real-time inference program, potentially in a faster language such as C++.
@@ -56,3 +56,4 @@ Here I will plan the technical aspects to ensure readiness and success for on-si
  - List out all unknowns.
  - Don't overparametrize model. If modularization is performed, use best guesses for other dynamics and values.
  - Know what tools I am familiar with, what they can do, and plan out every tool I will use.
+ 

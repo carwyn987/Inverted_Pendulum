@@ -12,7 +12,7 @@ env = gym.make('CartPole-v1',
                gravity=9.80665,
                masscart=0.4,
                masspole=0.4,
-               half_length=0.6,
+               half_length=0.6*1.0/2,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
@@ -54,7 +54,7 @@ if policy_name == "TD3":
 else:
     raise ValueError("Policy not recognized")
 
-policy.load(f"./models/{file_name}")
+policy.load(f"./models/best_td3/{file_name}")
 
 state, done = env.reset(), False
 

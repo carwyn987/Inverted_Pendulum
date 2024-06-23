@@ -1,5 +1,9 @@
 """
 python preliminary_tests/sensitivity_analysis.py preliminary_tests/model_weights/latency_2_target_dqn.pth 2
+
+or
+
+python preliminary_tests/sensitivity_analysis.py models/best_td3/ 2
 """
 
 import gymnasium as gym
@@ -9,9 +13,11 @@ import torch
 from models.dqn import ReplayBufferInvPend, AgentInvPend, Action_Value_Network
 from tqdm import tqdm
 import numpy as np
+import os
 import sys
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
+from collections import deque
 
 def setup_env_with_params(masscart=0.4, 
                           masspole=0.4, 
@@ -22,7 +28,8 @@ def setup_env_with_params(masscart=0.4,
                           render=False, 
                           init_x=0.0, 
                           init_x_dot=0.0, 
-                          init_theta=0, 
+                          init_theta=math.pi, 
+                          theta_threshold_radians=100*math.pi/3,
                           init_theta_dot=0.0, 
                           perturbations=True):
     full_env_dict = {
@@ -33,7 +40,7 @@ def setup_env_with_params(masscart=0.4,
         'half_length': half_length,
         'force_mag': force_mag,
         'tau': tau,
-        'theta_threshold_radians': math.pi/3,
+        'theta_threshold_radians': theta_threshold_radians,
         'x_threshold': x_threshold,
         'init_x': init_x,
         'init_x_dot': init_x_dot,
@@ -65,9 +72,89 @@ def tester(model_weights_path, episodes=5, max_steps=1000, latency=0, env_params
 
     replay_buffer = ReplayBufferInvPend(buffer_size)
     agent = AgentInvPend(replay_buffer, env, latency=latency)
-    behavior_model = Action_Value_Network(observation_shapes, num_actions).to(device)
-    behavior_model.load_state_dict(torch.load(model_weights_path))
-    behavior_model.eval()
+    if "policy" in model_weights_path or "td3" in model_weights_path.lower():
+        from models import td3 as TD3
+        policy_name = "TD3"
+        env_name = "CartPole-v1"
+        seed = 0
+        file_name = f"{policy_name}_{env_name}_{seed}"
+        max_action = 1.0
+        state_dim = env.observation_space.shape[0]
+        action_dim = 1
+
+        if policy_name == "TD3":
+            args = {
+                "state_dim": state_dim,
+                "action_dim": action_dim,
+                "max_action": max_action,
+                "discount": 0.99,
+                "tau": 0.005,
+                "policy_noise": 0.0,
+                "noise_clip": 0.0,
+                "policy_freq": 2,
+                "policy_noise": 0.0 * max_action,
+                "noise_clip": 0.0 * max_action,
+                "policy_freq": 2
+            }
+            behavior_model = TD3.TD3(**args)
+        else:
+            raise ValueError("Policy not recognized")
+
+        behavior_model.load(os.path.join(model_weights_path, file_name))
+        behavior_model.actor.eval()
+        behavior_model.critic.eval()
+        return run_td3(env, episodes, max_steps, behavior_model, max_action, latency)
+    else:                                                                        
+        behavior_model = Action_Value_Network(observation_shapes, num_actions).to(device)
+        behavior_model.load_state_dict(torch.load(model_weights_path))
+        behavior_model.eval()
+        return run_dqn(episodes, max_steps, agent, behavior_model, epsilon, env, device)
+
+
+def run_td3(env, episodes, max_steps, policy, max_action, latency):
+     # Keep track of number of steps passed per episode
+    steps_passed = []
+    returns = []
+
+    # action deque empty with max size
+    action_deque = deque(maxlen=latency)
+
+    state, done = env.reset(), False
+
+    for ep in range(episodes):
+        total_reward = 0
+        for step in range(max_steps):
+            
+            action = (policy.select_action(np.array(state))).clip(-max_action, max_action).astype(np.float32)
+            
+            if latency > 0:
+                action_deque.append(action)
+                if len(action_deque) < latency:
+                    action = np.array([0.0],dtype=np.float32)
+                else:
+                    action = action_deque.popleft()
+
+            next_state, reward, done, _, _ = env.step(action)
+            state = next_state
+            total_reward += reward
+
+            if done:
+                break
+        
+        if not done:
+            env.reset()
+
+        steps_passed.append(step)
+        returns.append(total_reward)
+        env.reset()
+
+    return {
+        'steps_passed': steps_passed,
+        'returns': returns
+    }
+
+
+def run_dqn(episodes, max_steps, agent, behavior_model, epsilon, env, device="cpu"):
 
     # Keep track of number of steps passed per episode
     steps_passed = []
@@ -98,7 +185,7 @@ def tester(model_weights_path, episodes=5, max_steps=1000, latency=0, env_params
 def coordinator(model_weights_path, latency_trained_on):
 
     max_steps = 1000
-    num_episodes = 200
+    num_episodes = 20
 
     params = {
         'masscart': 0.4, 
