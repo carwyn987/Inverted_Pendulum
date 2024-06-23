@@ -22,6 +22,7 @@ if theta > -1 * math.pi/24 and theta < math.pi/24:
     reward += 10
 if reward < 0: reward = 0
 ```
+Note the lack of an explicit x-position component, which explains the full use of horizontal space by the agent.
 
 ### 2024
 
