@@ -7,6 +7,20 @@ An [inverted pendulum](https://en.wikipedia.org/wiki/Inverted_pendulum) is a dyn
 
 ## History of Project
 
+### Most Recent Updates
+
+DQN Model balances pendulum, but cannot converge from hanging (stable) initialization in a reasonable amount of time and resources.
+
+TD3 trained to convergence on episodes of length 1000 steps (0.02s resolution = 20s). Video below. Note: there are perturbations in the test, which explain some unexpected movements. These represent external forces acting on the pole, or noise in the system.
+
+Reward function that worked well for TD3:
+```
+reward = math.cos(theta % (2*math.pi)) + 1
+if theta > -1 * math.pi/24 and theta < math.pi/24:
+    reward += 10
+if reward < 0: reward = 0
+```
+
 ### 2024
 
 After a long intermission, I have decided to re-approach the project. However, I have an agenda in mind. As I will be traveling back to where the hardware is for one week only, I wish to simulate a solutions type of job, where the employee is dispatched to an on-site location, where they are responsible for quickly getting a system up and running. Therefore, I plan to prepare for this trip, and see how much I can minimize the on-site time necessary to get the pendulum balanced. Furthermore, I want to make the goals specific and as numerous as possible, so the goal is the following:
