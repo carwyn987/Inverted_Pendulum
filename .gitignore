@@ -1,2 +1,4 @@
 Gymnasium/
 __pycache__/
+preliminary_tests/models/a2c.py
+results/
