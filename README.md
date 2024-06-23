@@ -13,6 +13,8 @@ DQN Model balances pendulum, but cannot converge from hanging (stable) initializ
 
 TD3 trained to convergence on episodes of length 1000 steps (0.02s resolution = 20s). Video below. Note: there are perturbations in the test, which explain some unexpected movements. These represent external forces acting on the pole, or noise in the system.
 
+https://github.com/carwyn987/Inverted_Pendulum/assets/28845732/e16f0db4-fafe-4622-8498-058ad09bbe2e
+
 Reward function that worked well for TD3:
 ```
 reward = math.cos(theta % (2*math.pi)) + 1
