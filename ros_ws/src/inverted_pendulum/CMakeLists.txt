@@ -8,7 +8,8 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED) # ADDED dependency on external* package
-find_package(std_msgs REQUIRED) # ADDED dependency on external* package
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -16,17 +17,24 @@ find_package(std_msgs REQUIRED) # ADDED dependency on external* package
 add_executable(encoder src/simulated_encoder.cpp)
 ament_target_dependencies(encoder rclcpp std_msgs)
 
-add_executable(state_estimator src/state_estimator.cpp)
-ament_target_dependencies(state_estimator rclcpp std_msgs)
-
 target_include_directories(encoder PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_compile_features(encoder PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
+add_executable(state_estimator src/state_estimator.cpp)
+ament_target_dependencies(state_estimator rclcpp std_msgs geometry_msgs)
+
+# Include include directory
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_executable(full_state_estimator src/full_state_estimator.cpp)
+ament_target_dependencies(full_state_estimator rclcpp geometry_msgs)
+
 install(TARGETS 
   encoder
   state_estimator
+  full_state_estimator
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

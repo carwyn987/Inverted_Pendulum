@@ -6,7 +6,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include <std_msgs/msg/int16.hpp>
-#include <std_msgs/msg/header.hpp>
 
 using namespace std::chrono_literals;
 
@@ -29,15 +28,12 @@ private:
   {
     std_msgs::msg::Int16 msg;
     msg.data = 1;
-    std_msgs::msg::Header header;
-    header.stamp = rclcpp::Clock().now();
-    header.frame_id = "my_init_frame_id";
-    // msg.header = header; # Need to get custom stamped messages working before I can add this.
-
+    
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     RCLCPP_INFO(
       this->get_logger(), 
       "Publishing: '%d' at time '%u'", 
-      msg.data, header.stamp.sec
+      msg.data, static_cast<uint>(now_sec)
     );
     publisher_->publish(msg);
   }
