@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>inverted_pendulum</name>
+  <version>0.0.0</version>
+  <description>Inverted pendulum simulation / control system using reinforcement learning (TD3). This project was embarked upon to provide the developer (me) with real-world experience generalizing RL to applications.</description>
+  <maintainer email="carwyncollinsworth@gmail.com">carwyn</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend> <!--Added build dependencies-->
+  <depend>std_msgs</depend> <!--Added build dependencies-->
+  <exec_depend>ros2launch</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

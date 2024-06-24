@@ -1,4 +1,15 @@
+# Modified environment (should really be a git submodule)
 Gymnasium/
+
+# Anything cached
 __pycache__/
+
+# RL Testing Models
 preliminary_tests/models/a2c.py
 results/
+
+# ROS2 Humble ignored
+*/build/
+*/install/
+*/log/
+ros_ws/src/.git/

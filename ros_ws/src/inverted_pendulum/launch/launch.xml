@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="inverted_pendulum" exec="encoder" name="encoder_1" namespace="encoder_namespace_1"/>
+  <node pkg="inverted_pendulum" exec="state_estimator" name="state_estimator_1" namespace="state_estimator_namespace_1"/>
+</launch>
