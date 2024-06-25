@@ -43,6 +43,15 @@ public:
     full_state_subscription_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
       "full_state", 10, std::bind(&TD3Algorithm::full_state_callback, this, _1));
     inference_publisher_ = this->create_publisher<std_msgs::msg::Float32>("inference", 10);
+
+    // Load the model
+    try {
+      // Deserialize the ScriptModule from a file using torch::jit::load().
+      module = torch::jit::load("/home/carwyn/dev/Inverted_Pendulum/models/policy.pt");
+    }
+    catch (const c10::Error& e) {
+      std::cerr << "error loading the model\n";
+    }
   }
 
 private:
@@ -60,36 +69,36 @@ private:
       static_cast<uint>(now_sec), pos, theta, pos_dot, theta_dot
     );
 
-    publish_inference();
+    publish_inference(msg.data);
   }
 
-  void publish_inference()
+  void publish_inference(std::vector<float> state)
   {
+    // Create a vector of inputs.
+    std::vector<torch::jit::IValue> inputs;
+    // Turn state into a torch tensor
+    torch::Tensor state_tensor = torch::from_blob(state.data(), {1, 4});
+    inputs.push_back(state_tensor);
 
-    // torch::Tensor tensor = torch::rand({2, 3});
-    // std::cout << tensor << std::endl;
+    // Execute the model and turn its output into a tensor.
+    at::Tensor output = module.forward(inputs).toTensor();
+    std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
 
-    // int main(int argc, const char* argv[]) {
-    //   if (argc != 2) {
-    //     std::cerr << "usage: example-app <path-to-exported-script-module>\n";
-    //     return -1;
-    //   }
+    RCLCPP_INFO(
+      this->get_logger(), 
+      "PREDICTION: '%f'", 
+      output[0].item<float>()
+    );
 
-
-    torch::jit::script::Module module;
-    try {
-      // Deserialize the ScriptModule from a file using torch::jit::load().
-      module = torch::jit::load("/home/carwyn/dev/Inverted_Pendulum/models/policy.pt");
-    }
-    catch (const c10::Error& e) {
-      std::cerr << "error loading the model\n";
-    }
-
-    // absolute_state_publisher_->publish(msg);
+    std_msgs::msg::Float32 msg;
+    msg.data = output[0].item<float>();
+    inference_publisher_->publish(msg);
   }
 
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr full_state_subscription_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr inference_publisher_;
+
+  torch::jit::script::Module module;
 };
 
 int main(int argc, char * argv[])
