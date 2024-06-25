@@ -5,14 +5,22 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+
+
 # find dependencies
+find_package(Torch REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED) # ADDED dependency on external* package
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+
+# PYTORCH
+# export CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/home/carwyn/Downloads/libtorch
+# set(CMAKE_PREFIX_PATH ./libtorch)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+add_executable(td3_algo src/td3_algorithm.cpp)
+ament_target_dependencies(td3_algo rclcpp std_msgs Torch)
 
 add_executable(encoder src/simulated_encoder.cpp)
 ament_target_dependencies(encoder rclcpp std_msgs)
@@ -35,7 +43,11 @@ install(TARGETS
   encoder
   state_estimator
   full_state_estimator
+  td3_algo
   DESTINATION lib/${PROJECT_NAME})
+
+target_link_libraries(td3_algo "${TORCH_LIBRARIES}") # link torch libraries
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

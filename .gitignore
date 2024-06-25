@@ -4,6 +4,9 @@ Gymnasium/
 # Anything cached
 __pycache__/
 
+# VSCode
+.vscode/
+
 # RL Testing Models
 preliminary_tests/models/a2c.py
 results/
