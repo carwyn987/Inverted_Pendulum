@@ -23,13 +23,13 @@ add_executable(td3_algo src/td3_algorithm.cpp)
 ament_target_dependencies(td3_algo rclcpp std_msgs Torch)
 
 # add_executable(encoder src/simulated_encoder.cpp)
-add_executable(encoder src/encoder_adapter.cpp)
-ament_target_dependencies(encoder rclcpp std_msgs)
+add_executable(adapter src/adapter.cpp)
+ament_target_dependencies(adapter rclcpp std_msgs)
 
-target_include_directories(encoder PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(encoder PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+# target_include_directories(adapter PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# target_compile_features(adapter PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 add_executable(state_estimator src/state_estimator.cpp)
 ament_target_dependencies(state_estimator rclcpp std_msgs geometry_msgs)
@@ -41,7 +41,7 @@ add_executable(full_state_estimator src/full_state_estimator.cpp)
 ament_target_dependencies(full_state_estimator rclcpp geometry_msgs)
 
 install(TARGETS 
-  encoder
+  adapter
   state_estimator
   full_state_estimator
   td3_algo

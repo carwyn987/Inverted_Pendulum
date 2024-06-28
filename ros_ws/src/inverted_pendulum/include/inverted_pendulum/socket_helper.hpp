@@ -8,19 +8,16 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 12345
-
 // Setup socket function (called during initialization)
-int setup_socket() {
+int setup_socket(const char *server_ip, int server_port) {
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (clientSocket == -1) return -1;
 
     struct sockaddr_in serverAddr;
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
-    inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr);
+    serverAddr.sin_port = htons(server_port);
+    inet_pton(AF_INET, server_ip, &serverAddr.sin_addr);
 
     int connectResult = -1;
     while (connectResult == -1) {
@@ -43,12 +40,13 @@ int send_to_socket(int clientSocket, float action) {
 
 // Receive from socket function
 // receivedFloat is update to get results to the caller
-float receive_from_socket(int clientSocket, float& receivedFloat) {
-    if (recv(clientSocket, (char*)&receivedFloat, sizeof(float), 0) == -1) {
+int receive_from_socket(int clientSocket, float& receivedFloat) {
+    int status = recv(clientSocket, (char*)&receivedFloat, sizeof(float), 0);
+    if (status == -1) {
         close(clientSocket);
         return -1;
     }
-    return 0;
+    return status;
 }
 
 // Close socket function

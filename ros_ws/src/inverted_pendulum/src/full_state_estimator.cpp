@@ -36,11 +36,11 @@ private:
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     double now_sec = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 1e6);
 
-    RCLCPP_INFO(
-      this->get_logger(), 
-      "Received absolute state: theta='%f', x_pos='%f' at time '%u'", 
-      msg.theta, msg.x, static_cast<uint>(now_sec)
-    );
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "Received absolute state: theta='%f', x_pos='%f' at time '%u'", 
+    //   msg.theta, msg.x, static_cast<uint>(now_sec)
+    // );
 
     // Add to deque
     pos_buffer.push_back(_current_x_pos);
@@ -76,9 +76,16 @@ private:
     // msg.layout.dim.push_back(dim);
 
     // Set the data array
-    float theta_radians = _current_count_theta * 2 * 3.14159 / 2000;
-    float theta_dot_radians = theta_dot * 2 * 3.14159 / 2000;
+    float theta_radians = ((3.14159 * 20000) + static_cast<float>(_current_count_theta)) / 20000.0;
+    float theta_dot_radians = static_cast<float>(theta_dot) / 20000.0;
     full_state_msg.data = {_current_x_pos, pos_dot, theta_radians, theta_dot_radians};
+
+    RCLCPP_INFO(
+      this->get_logger(), 
+      "Full state: x='%f', x_dot='%f', theta='%f', theta_dot='%f' at time '%f'", 
+      full_state_msg.data[0], full_state_msg.data[1], full_state_msg.data[2], full_state_msg.data[3], now_sec
+    );
+
 
     full_state_publisher_->publish(full_state_msg);
   }

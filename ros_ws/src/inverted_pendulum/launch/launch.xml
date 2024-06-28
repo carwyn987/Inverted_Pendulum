@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="inverted_pendulum" exec="encoder" name="encoder_1" namespace="inv_pend_main_namespace"/>
+  <node pkg="inverted_pendulum" exec="adapter" name="adapter_1" namespace="inv_pend_main_namespace"/>
   <node pkg="inverted_pendulum" exec="state_estimator" name="state_estimator_1" namespace="inv_pend_main_namespace"/>
   <node pkg="inverted_pendulum" exec="full_state_estimator" name="full_state_estimator_1" namespace="inv_pend_main_namespace"/>
   <node pkg="inverted_pendulum" exec="td3_algo" name="td3_algorithm_1" namespace="inv_pend_main_namespace"/>

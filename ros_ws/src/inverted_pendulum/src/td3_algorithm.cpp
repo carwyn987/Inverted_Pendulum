@@ -60,17 +60,17 @@ public:
 private:
   void full_state_callback(const std_msgs::msg::Float32MultiArray & msg)
   {
-    double pos = msg.data[0];
-    double theta = msg.data[1];
-    double pos_dot = msg.data[2];
-    double theta_dot = msg.data[3];
+    // double pos = msg.data[0];
+    // double theta = msg.data[1];
+    // double pos_dot = msg.data[2];
+    // double theta_dot = msg.data[3];
 
-    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    RCLCPP_INFO(
-      this->get_logger(), 
-      "Received full state at time '%u'. State=['%f', '%f', '%f', '%f']", 
-      static_cast<uint>(now_sec), pos, theta, pos_dot, theta_dot
-    );
+    // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "Received full state at time '%u'. State=['%f', '%f', '%f', '%f']", 
+    //   static_cast<uint>(now_sec), pos, theta, pos_dot, theta_dot
+    // );
 
     publish_inference(msg.data);
   }
@@ -87,11 +87,11 @@ private:
     at::Tensor output = module.forward(inputs).toTensor();
     std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
 
-    RCLCPP_INFO(
-      this->get_logger(), 
-      "PREDICTION: '%f'", 
-      output[0].item<float>()
-    );
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "PREDICTION: '%f'", 
+    //   output[0].item<float>()
+    // );
 
     std_msgs::msg::Float32 msg;
     msg.data = output[0].item<float>();
