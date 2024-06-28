@@ -28,6 +28,7 @@
 #include <functional>
 #include <memory>
 
+#include "inverted_pendulum/socket_helper.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include <std_msgs/msg/float32.hpp>
 #include <std_msgs/msg/float32_multi_array.hpp>
@@ -52,6 +53,8 @@ public:
     catch (const c10::Error& e) {
       std::cerr << "error loading the model\n";
     }
+
+    // sock = setup_sending_socket();
   }
 
 private:
@@ -93,16 +96,20 @@ private:
     std_msgs::msg::Float32 msg;
     msg.data = output[0].item<float>();
     inference_publisher_->publish(msg);
+
+    // Send to socket to enable communication
+    // send_to_socket(sock, output[0].item<float>());
   }
 
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr full_state_subscription_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr inference_publisher_;
 
   torch::jit::script::Module module;
+  int sock;
 };
 
 int main(int argc, char * argv[])
-{  
+{
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<TD3Algorithm>());
   rclcpp::shutdown();

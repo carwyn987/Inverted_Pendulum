@@ -22,7 +22,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 add_executable(td3_algo src/td3_algorithm.cpp)
 ament_target_dependencies(td3_algo rclcpp std_msgs Torch)
 
-add_executable(encoder src/simulated_encoder.cpp)
+# add_executable(encoder src/simulated_encoder.cpp)
+add_executable(encoder src/encoder_adapter.cpp)
 ament_target_dependencies(encoder rclcpp std_msgs)
 
 target_include_directories(encoder PUBLIC

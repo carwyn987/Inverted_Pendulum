@@ -5,6 +5,13 @@
 // #include "interp_1d.h"
 // #include "interp_linear.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
 float savitzky_golay_interpolate() {
     return 0.0;
 }
