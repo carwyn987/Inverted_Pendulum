@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "inverted_pendulum/socket_helper.hpp"
+#include "inverted_pendulum/arduino_comm.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include <std_msgs/msg/int16.hpp>
 #include <std_msgs/msg/float32.hpp>
@@ -28,18 +29,16 @@ public:
       "inference", 10, std::bind(&CommunicationAdapter::forward_stepper_pulse, this, _1)
     );
     
-    // Setup a socket connection
-    const char* host_c = "127.0.0.1";
-    sock = setup_socket(host_c, 12354);
+    // Set up serial connection
+    const char* portname = "/dev/ttyUSB0"; // Adjust this to your port
+    fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+    if (fd < 0) {
+        std::cerr << "Error opening " << portname << ": " << strerror(errno) << std::endl;
+    }
 
-    RCLCPP_INFO(
-      this->get_logger(), 
-      "Socket connected at: '%d'", 
-      sock
-    );
-    
-    // Loop checking for new msgs, calling send_data whenever true.
-    // comm_loop();
+    if (set_serial_attributes(fd, B9600, 0) < 0) {
+        close(fd);
+    }
 
     // Create a separate thread for the comm loop
     comm_thread_ = std::thread([this] {
@@ -65,19 +64,27 @@ private:
   }
 
   void comm_loop(){
-    int encoder_status = -1;
-    float encoder_data = 0;
-    while (true){
-      encoder_status = receive_from_socket(sock, encoder_data);
+    // int encoder_status = -1;
+    // float encoder_data = 0;
+    // while (true){
+    //   encoder_status = receive_from_socket(sock, encoder_data);
 
-      // Encoder data received --> send to encoder topic
-      if (encoder_status > 0){
-        send_encoder_data(encoder_data);
-      }
+    //   // Encoder data received --> send to encoder topic
+    //   if (encoder_status > 0){
+    //     send_encoder_data(encoder_data);
+    //   }
 
-      encoder_status = -1;
-      encoder_data = 0;
-    }
+    //   encoder_status = -1;
+    //   encoder_data = 0;
+    // }
+    float value = read_floats_from_serial(fd);
+    // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "Got encoder reading : '%f' at time '%u'", 
+    //   value, static_cast<uint>(now_sec)
+    // );
+    send_encoder_data(value);
   }
 
   void send_encoder_data(float data)
@@ -101,6 +108,7 @@ private:
   size_t count_;
 
   int sock;
+  int fd;
 };
 
 int main(int argc, char * argv[])

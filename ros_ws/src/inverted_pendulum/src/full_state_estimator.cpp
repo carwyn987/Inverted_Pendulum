@@ -76,7 +76,13 @@ private:
     // msg.layout.dim.push_back(dim);
 
     // Set the data array
-    float theta_radians = ((3.14159 * 20000) + static_cast<float>(_current_count_theta)) / 20000.0;
+    // Currently the data is 4000 and -4000 at theta = pi, and 0 at theta = 0. Convert to 0 and 4000 at 0, and 2000 at pi.
+    if (_current_count_theta < 0){
+      _current_count_theta += 8000;
+    }
+    // now _current_count_theta is between 0 and 4000
+    float theta_radians = _current_count_theta * 2 * M_PI / 8000;
+    // float theta_radians = ((2000) + static_cast<float>(_current_count_theta)) / 2000.0;
     float theta_dot_radians = static_cast<float>(theta_dot) / 20000.0;
     full_state_msg.data = {_current_x_pos, pos_dot, theta_radians, theta_dot_radians};
 

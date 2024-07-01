@@ -24,7 +24,8 @@ public:
 private:
   void encoder_pulse_callback(const std_msgs::msg::Int16 & msg)
   {
-    _count_theta += msg.data;
+    // _count_theta += msg.data; // += if we are going to use the encoder as a counter
+    _count_theta = msg.data; // = if we are going to use the encoder as an absolute value
 
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     // RCLCPP_INFO(
