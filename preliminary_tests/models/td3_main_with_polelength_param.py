@@ -25,10 +25,10 @@ import td3 as TD3
 # A fixed seed is used for the eval environment
 def eval_policy(policy, env_name, seed, eval_episodes=1):
 	eval_env = gym.make('CartPole-v1', 
-               gravity=15,
+               gravity=9.80665,
                masscart=0.4,
                masspole=0.4,
-               half_length=0.4,
+               half_length=0.6,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
@@ -91,10 +91,10 @@ if __name__ == "__main__":
 		os.makedirs("./models")
 
 	env = gym.make('CartPole-v1', 
-               gravity=15,
+               gravity=9.80665,
                masscart=0.4,
                masspole=0.4,
-               half_length=0.4,
+               half_length=0.6,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
@@ -106,8 +106,8 @@ if __name__ == "__main__":
                perturbations=True
             #    render_mode="human",
             #    screen_width=800,
-            #    screen_height=400
-	)
+            #    screen_height=400)
+    )
 
 	# Set seeds
 	# env.seed(args.seed)
@@ -191,6 +191,8 @@ if __name__ == "__main__":
 			episode_reward = 0
 			episode_timesteps = 0
 			episode_num += 1 
+			# env.half_length = float(np.random.uniform(0.3, 1.2))
+			# env.gravity = float(np.random.uniform(9.8, 20.0))
 
 		# Evaluate episode
 		if (t + 1) % args.eval_freq == 0:

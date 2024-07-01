@@ -8,6 +8,7 @@ const int A = 21;
 const int Z = 19;
 
 //limit switch pins
+
 const int leftLimitPin = 18;
 const int rightLimitPin = 19;
 
@@ -18,7 +19,7 @@ const int mOPin = 22;
 const int mlPin = 23;
 const int m2Pin = 24;
 
-uint8_t stepSize AndDir = B00000000; //00000001 is m0, 00000010 is ml, 00000100 is m2, 00001000 is dir.
+// uint8_t stepSize AndDir = B00000000; //00000001 is m0, 00000010 is ml, 00000100 is m2, 00001000 is dir.
 unsigned long stepPulseWidth = 2; //in milliseconds
 
 volatile int16_t count = -2000;
@@ -44,9 +45,9 @@ void setup() {
   digitalWrite(leftLimitPin, HIGH);
   digitalWrite(rightLimitPin, HIGH);
 
-  digitalWrite (A, HIGH);
-  digitalWrite (ISR_FOR_ENCODER_B, HIGH);
-  digitalWrite (Z, HIGH);
+  digitalWrite(A, HIGH);
+  digitalWrite(ISR_FOR_ENCODER_B, HIGH);
+  digitalWrite(Z, HIGH);
   //PORTD |=B00000111; //digitalWrites to high but faster
   
   PORTA & B00000000;
@@ -54,13 +55,13 @@ void setup() {
   //&= is for setting 0
   // is for setting 1
 
-  digitalWrite (26, LOW);
+  digitalWrite(26, LOW);
 
-  attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER_B), isrB, CHANGE);
-  attachInterrupt (digitalPinToInterrupt (ISR_FOR_ENCODER B), isrA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ISR_FOR_ENCODER_B), isrB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ISR_FOR_ENCODER B), isrA, CHANGE);
   
-  attachInterrupt (digitalPinToInterrupt (leftLimitPin), isrLimit, CHANGE);
-  attachInterrupt (digitalPinToInterrupt (rightLimitPin), isrLimit, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(leftLimitPin), isrLimit, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightLimitPin), isrLimit, CHANGE);
   
   
   Serial.begin(250000);
