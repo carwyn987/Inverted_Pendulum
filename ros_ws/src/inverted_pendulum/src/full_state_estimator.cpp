@@ -21,16 +21,19 @@ public:
     full_state_publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("full_state", 10);
 
     // initialize our buffers
-    uint buffer_size = 2;
+    uint buffer_size = 10;
     pos_buffer = boost::circular_buffer<float>(buffer_size);
-    theta_buffer = boost::circular_buffer<float>(buffer_size);
     time_buffer = boost::circular_buffer<double>(buffer_size);
+
+    buffer_size = 20;
+    theta_time_buffer = boost::circular_buffer<double>(buffer_size);
+    theta_buffer = boost::circular_buffer<float>(buffer_size);
   }
 
 private:
   void absolute_state_callback(const geometry_msgs::msg::Pose2D & msg)
   {
-    _current_count_theta = msg.theta;
+    _current_count_theta = static_cast<float>(msg.theta);
     _current_x_pos = msg.x;
 
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -46,6 +49,7 @@ private:
     pos_buffer.push_back(_current_x_pos);
     theta_buffer.push_back(_current_count_theta);
     time_buffer.push_back(now_sec);
+    theta_time_buffer.push_back(now_sec);
 
     // RCLCPP_INFO(
     //   this->get_logger(), 
@@ -56,13 +60,22 @@ private:
     // Interpolate full state and publish
     // float pos_state = linear_interp(&pos_buffer, &time_buffer, now_sec);
     // float theta_state = linear_interp(&theta_buffer, &time_buffer, now_sec);
-    float theta_dot = first_difference(theta_buffer, time_buffer);
-    float pos_dot = first_difference(pos_buffer, time_buffer);
+    float theta_dot;
+    float pos_dot;
+    try{
+      theta_dot = average_first_difference(theta_buffer, theta_time_buffer);
+      pos_dot = average_first_difference(pos_buffer, time_buffer);
+    }catch(std::invalid_argument &e){
+      RCLCPP_INFO(
+        this->get_logger(), 
+        "Not enough points to compute the average first difference."
+      );
+    }
    
     // RCLCPP_INFO(
     //   this->get_logger(), 
-    //   "Theta_dot: '%f', x_dot='%f' at time '%f'", 
-    //   theta_dot, pos_dot, now_sec
+    //   "Encoder steps: '%f', Theta_dot: '%f', x_dot='%f' at time '%f'", 
+    //   _current_count_theta, theta_dot, pos_dot, now_sec
     // );
 
     // Send full state
@@ -83,14 +96,14 @@ private:
     // now _current_count_theta is between 0 and 4000
     float theta_radians = _current_count_theta * 2 * M_PI / 8000;
     // float theta_radians = ((2000) + static_cast<float>(_current_count_theta)) / 2000.0;
-    float theta_dot_radians = static_cast<float>(theta_dot) / 20000.0;
+    float theta_dot_radians = theta_dot * 2 * M_PI / 8000.0;
     full_state_msg.data = {_current_x_pos, pos_dot, theta_radians, theta_dot_radians};
 
-    RCLCPP_INFO(
-      this->get_logger(), 
-      "Full state: x='%f', x_dot='%f', theta='%f', theta_dot='%f' at time '%f'", 
-      full_state_msg.data[0], full_state_msg.data[1], full_state_msg.data[2], full_state_msg.data[3], now_sec
-    );
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "Full state: x='%f', x_dot='%f', theta='%f', theta_dot='%f' at time '%f'", 
+    //   full_state_msg.data[0], full_state_msg.data[1], full_state_msg.data[2], full_state_msg.data[3], now_sec
+    // );
 
 
     full_state_publisher_->publish(full_state_msg);
@@ -99,12 +112,13 @@ private:
   rclcpp::Subscription<geometry_msgs::msg::Pose2D>::SharedPtr absolute_state_subscription_;
   rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr full_state_publisher_;
 
-  int _current_count_theta;
+  float _current_count_theta;
   float _current_x_pos;
 
   boost::circular_buffer<float> pos_buffer;
   boost::circular_buffer<float> theta_buffer;
   boost::circular_buffer<double> time_buffer;
+  boost::circular_buffer<double> theta_time_buffer;
 };
 
 int main(int argc, char * argv[])

@@ -7,10 +7,9 @@ import sys
 
 env = gym.make('CartPole-v1', 
                gravity=9.80665,
-               masscart=0.4,
-               masspole=0.4,
+               masscart=0.2,
+               masspole=0.2,
                half_length=0.6*1.0/2,
-               force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
                x_threshold=1,
@@ -25,9 +24,10 @@ env = gym.make('CartPole-v1',
 
 state, done = env.reset(), False
 
-n = 20
+n = 30
+step = 0.01
 for i in range(n):
-        action = np.array([-1], dtype=np.float32)
+        action = np.array([-1 * step], dtype=np.float32)
         next_state, reward, done, _, _ = env.step(action)
 
         state = next_state
@@ -36,7 +36,7 @@ for i in range(n):
             env.reset()
 for j in range(5):
     for i in range(2*n):
-        action = np.array([1], dtype=np.float32)
+        action = np.array([1 * step], dtype=np.float32)
         next_state, reward, done, _, _ = env.step(action)
 
         state = next_state
@@ -45,7 +45,7 @@ for j in range(5):
             env.reset()
     
     for i in range(2*n):
-        action = np.array([-1], dtype=np.float32)
+        action = np.array([-1 * step], dtype=np.float32)
         next_state, reward, done, _, _ = env.step(action)
 
         state = next_state

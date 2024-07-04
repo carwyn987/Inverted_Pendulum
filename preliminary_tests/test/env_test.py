@@ -1,6 +1,3 @@
-import gymnasium as gym
-import math
-
 """
 Custom environment. I have downloaded the source code from git@github.com:Farama-Foundation/Gymnasium.git
 and modified Gymnasium/gymnasium/envs/classic_control/cartpole.py to add kwargs for env parameters.
@@ -35,6 +32,11 @@ pip install Gymnasium/
 ```
 
 """
+
+import gymnasium as gym
+import math
+import numpy as np
+
 # Best guess at true environment parameters
 env = gym.make('CartPole-v1', 
                gravity=9.80665,
@@ -53,14 +55,20 @@ env = gym.make('CartPole-v1',
                screen_width=800,
                screen_height=400)
 
-observation, info = env.reset(seed=1)
+print(env.reset(seed=1))
 print(env.action_space)
 
-for i in range(100):
-    action = env.action_space.sample()
-    # action = np.array([-0.1], dtype=np.float32)
-    observation, reward, terminated, truncated, info = env.step(action)
-    if not i%10: print(observation)
+n = 10
+def run(action, steps):
+    for i in range(steps):
+        action = np.array([action], dtype=np.float32).flatten()
+        observation, reward, terminated, truncated, info = env.step(action)
+        if not i%10: print(observation)
 
-    if terminated or truncated:
-        observation, info = env.reset()
+        if terminated or truncated:
+            env.reset()
+
+run(-1.0,n//2)
+while True:
+    run(1.0,n)
+    run(-1.0,n)

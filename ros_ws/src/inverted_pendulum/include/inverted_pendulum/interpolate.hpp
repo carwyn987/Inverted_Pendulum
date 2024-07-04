@@ -31,3 +31,20 @@ float savitzky_golay_interpolate() {
 float first_difference(boost::circular_buffer<float> &buffer, boost::circular_buffer<double> &time_buffer){
     return static_cast<float>(buffer[1] - buffer[0]) / (time_buffer[1] - time_buffer[0]);
 }
+
+float average_first_difference(boost::circular_buffer<float> &buffer, boost::circular_buffer<double> &time_buffer) {
+    // Check if there are at least two points to compute the differences
+    if (buffer.size() < 2 || time_buffer.size() < 2) {
+        throw std::invalid_argument("Buffers must contain at least two points.");
+    }
+
+    // Calculate the sum of the rates of change
+    float sum_rates = 0.0;
+    for (size_t i = 1; i < buffer.size(); ++i) {
+        float rate = static_cast<float>(buffer[i] - buffer[i - 1]) / (time_buffer[i] - time_buffer[i - 1]);
+        sum_rates += rate;
+    }
+
+    // Return the average rate of change
+    return sum_rates / static_cast<float>(buffer.size() - 1);
+}

@@ -72,6 +72,8 @@ private:
     //   static_cast<uint>(now_sec), pos, theta, pos_dot, theta_dot
     // );
 
+    last_state = msg.data; // save message data
+
     publish_inference(msg.data);
   }
 
@@ -87,14 +89,27 @@ private:
     at::Tensor output = module.forward(inputs).toTensor();
     std::cout << output.slice(/*dim=*/1, /*start=*/0, /*end=*/5) << '\n';
 
-    // RCLCPP_INFO(
-    //   this->get_logger(), 
-    //   "PREDICTION: '%f'", 
-    //   output[0].item<float>()
-    // );
+    // Given output, which is a force, compute the approximate step
+    float velocity = state[1];
+    float force = output[0].item<float>();
+    float acceleration = force / 0.1; // mass = insignificant
+    float time = 3 / 1000.0; // 1 ms
+    float difference_in_velocity = acceleration * time;
+    float new_velocity = velocity + difference_in_velocity;
+    if (new_velocity < -1.0) {
+      new_velocity = -1.0;
+    }else if (new_velocity > 1.0) {
+      new_velocity = 1.0;
+    }
+
+    RCLCPP_INFO(
+      this->get_logger(), 
+      "Vel='%0.2f', Force='%0.2f', Accel='%0.2f', New Vel='%0.2f', Last State='%0.2f %0.2f %0.2f %0.2f'", 
+      velocity, force, acceleration, new_velocity, last_state[0], last_state[1], last_state[2], last_state[3]
+    );
 
     std_msgs::msg::Float32 msg;
-    msg.data = output[0].item<float>();
+    msg.data = acceleration;
     inference_publisher_->publish(msg);
 
     // Send to socket to enable communication
@@ -106,6 +121,8 @@ private:
 
   torch::jit::script::Module module;
   int sock;
+
+  std::vector<float> last_state = {0.0, 0.0, 0.0, 0.0};
 };
 
 int main(int argc, char * argv[])

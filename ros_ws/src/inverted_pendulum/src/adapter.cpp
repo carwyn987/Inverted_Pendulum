@@ -59,8 +59,9 @@ private:
     //   "Stepper pulse received and being forwarded of: '%f'", 
     //   msg.data
     // );
+    // send_to_socket(sock, static_cast<float>(msg.data));
 
-    send_to_socket(sock, static_cast<float>(msg.data));
+    send_floats_to_serial(fd, static_cast<float>(msg.data));
   }
 
   void comm_loop(){

@@ -66,3 +66,11 @@ float read_floats_from_serial(int fd) {
     }
     return value;
 }
+
+void send_floats_to_serial(int fd, float value) {
+    std::string data = std::to_string(value) + "\n";
+    int n = write(fd, data.c_str(), data.size());
+    if (n < 0) {
+        std::cerr << "Error from write: " << strerror(errno) << std::endl;
+    }
+}

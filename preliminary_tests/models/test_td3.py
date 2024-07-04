@@ -9,11 +9,11 @@ import td3 as TD3
 
 
 env = gym.make('CartPole-v1', 
-               gravity=20,
+               gravity=15,
                masscart=0.4,
                masspole=0.4,
                half_length=0.4,
-               force_mag=6.0,
+               force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
                x_threshold=1,
@@ -62,6 +62,7 @@ for t in range(int(max_timesteps)):
 		
         action = (policy.select_action(np.array(state))).clip(-max_action, max_action).astype(np.float32)
         next_state, reward, done, _, _ = env.step(action)
+        print(next_state[2])
 
         state = next_state
 

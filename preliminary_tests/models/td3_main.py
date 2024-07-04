@@ -26,13 +26,13 @@ import td3 as TD3
 def eval_policy(policy, env_name, seed, eval_episodes=1):
 	eval_env = gym.make('CartPole-v1', 
                gravity=15,
-               masscart=0.4,
+               masscart=0.2,
                masspole=0.4,
-               half_length=0.4,
+               half_length=0.5,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
-               x_threshold=1,
+               x_threshold=1.0,
                init_x=0.0,
                init_x_dot=0.0,
                init_theta= math.pi, # 0, # start in the upwards position
@@ -91,14 +91,14 @@ if __name__ == "__main__":
 		os.makedirs("./models")
 
 	env = gym.make('CartPole-v1', 
-               gravity=15,
-               masscart=0.4,
+               gravity=13,
+               masscart=0.2,
                masspole=0.4,
-               half_length=0.4,
+               half_length=0.5,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
-               x_threshold=1,
+               x_threshold=1.0,
                init_x=0.0,
                init_x_dot=0.0,
                init_theta= math.pi, # 0, # start in the upwards position
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 	
 	state_dim = env.observation_space.shape[0]
 	action_dim = 1 # env.action_space.shape[0] 
-	max_action = 1.0 # float(env.action_space.high[0])
+	max_action = 0.0075 # float(env.action_space.high[0])
 
 	kwargs = {
 		"state_dim": state_dim,
