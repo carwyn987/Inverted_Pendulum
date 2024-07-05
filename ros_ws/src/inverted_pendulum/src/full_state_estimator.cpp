@@ -21,7 +21,7 @@ public:
     full_state_publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("full_state", 10);
 
     // initialize our buffers
-    uint buffer_size = 10;
+    uint buffer_size = 5;
     pos_buffer = boost::circular_buffer<float>(buffer_size);
     time_buffer = boost::circular_buffer<double>(buffer_size);
 

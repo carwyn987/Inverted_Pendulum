@@ -11,7 +11,7 @@ policy_name = "TD3"
 env_name = "CartPole-v1"
 seed = 0
 file_name = f"{policy_name}_{env_name}_{seed}"
-max_action = 1.0
+max_action = 0.0075
 action_dim = 1
 state_dim = 4
 

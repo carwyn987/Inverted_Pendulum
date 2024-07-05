@@ -49,11 +49,11 @@ private:
     // Remember: msg.data from the stepper is a step, not absolute. We are tracking absolute x_pos
     // msg.data is the step size, which can be either 1, 1/2, 1/4, 1/8, 1/16, or 1/32. Compute the equivalent distance:
 
-    float applied_move = get_applied_move(msg.data); // in number of steps
-    applied_move *= 1.8 / 360.0; // steps -> degrees -> now into percentage of a full rotation
-    float radius = 0.028 * 16; // 4.8 cm :: 248 full steps = 1/2 distance 
-    applied_move *= 2 * M_PI * radius; // now to distance
-    _x_pos += applied_move; // Convert to (?))
+    // float applied_move = get_applied_move(msg.data); // in number of steps
+    // applied_move *= 1.8 / 360.0; // steps -> degrees -> now into percentage of a full rotation
+    // float radius = 0.028 * 16; // 4.8 cm :: 248 full steps = 1/2 distance 
+    // applied_move *= 2 * M_PI * radius; // now to distance
+    _x_pos += msg.data; // Convert to (?))
 
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     // RCLCPP_INFO(

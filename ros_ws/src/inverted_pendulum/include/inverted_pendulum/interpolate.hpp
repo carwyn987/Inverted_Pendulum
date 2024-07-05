@@ -46,5 +46,8 @@ float average_first_difference(boost::circular_buffer<float> &buffer, boost::cir
     }
 
     // Return the average rate of change
+    if (buffer.size() < 2) {
+        return 0.0;
+    }
     return sum_rates / static_cast<float>(buffer.size() - 1);
 }
