@@ -53,7 +53,7 @@ private:
     // applied_move *= 1.8 / 360.0; // steps -> degrees -> now into percentage of a full rotation
     // float radius = 0.028 * 16; // 4.8 cm :: 248 full steps = 1/2 distance 
     // applied_move *= 2 * M_PI * radius; // now to distance
-    _x_pos += msg.data; // Convert to (?))
+    _x_pos += 0.5 * msg.data; // Convert to (?))
 
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     // RCLCPP_INFO(
@@ -62,8 +62,8 @@ private:
     //   msg.data, static_cast<uint>(now_sec), _x_pos
     // );
 
-    // delay 1 ms
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // delay to make sure the stepper motor has time to move
+    std::this_thread::sleep_for(std::chrono::milliseconds(9));
     publish_absolute_state();
   }
 

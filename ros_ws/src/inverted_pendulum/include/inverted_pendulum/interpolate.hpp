@@ -51,3 +51,16 @@ float average_first_difference(boost::circular_buffer<float> &buffer, boost::cir
     }
     return sum_rates / static_cast<float>(buffer.size() - 1);
 }
+
+// Function to convert boost::circular_buffer<float> to a float32 array
+float* convert_to_float32_array(boost::circular_buffer<float>& buffer) {
+    // Allocate memory for the float32 array
+    float* float_array = new float[buffer.size()];
+
+    // Copy elements from the circular buffer to the array
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        float_array[i] = buffer[i];
+    }
+
+    return float_array;
+}

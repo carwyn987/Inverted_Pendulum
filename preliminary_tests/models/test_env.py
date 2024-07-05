@@ -31,7 +31,7 @@ for i in range(n):
         next_state, reward, done, _, _ = env.step(action)
 
         state = next_state
-
+        print(next_state)
         if done:
             env.reset()
 for j in range(5):

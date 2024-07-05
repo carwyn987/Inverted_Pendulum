@@ -13,7 +13,7 @@ seed = 0
 file_name = f"{policy_name}_{env_name}_{seed}"
 max_action = 0.0075
 action_dim = 1
-state_dim = 4
+state_dim = 6
 
 args = {
     "state_dim": state_dim,
@@ -30,9 +30,9 @@ args = {
 }
 policy = TD3.TD3(**args)
 
-policy.load(f"./models/best_td3/{file_name}")
+policy.load(f"./models/{file_name}")
 
-example = torch.tensor(np.array([0.1, -0.1, 0.14, -0.132], dtype=np.float32))
+example = torch.tensor(np.array([0.1, -0.1, 0.14, -0.132, 0.16, 0.13], dtype=np.float32))
 # Use torch.jit.trace to generate a torch.jit.ScriptModule via tracing.
 traced_script_module = torch.jit.trace(policy.actor.to("cpu"), example)
 

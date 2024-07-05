@@ -32,7 +32,7 @@ def eval_policy(policy, env_name, seed, eval_episodes=1):
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
-               x_threshold=1.0,
+               x_threshold=0.2,
                init_x=0.0,
                init_x_dot=0.0,
                init_theta= math.pi, # 0, # start in the upwards position
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
-               x_threshold=1.0,
+               x_threshold=0.2,
                init_x=0.0,
                init_x_dot=0.0,
                init_theta= math.pi, # 0, # start in the upwards position
@@ -116,6 +116,7 @@ if __name__ == "__main__":
 	np.random.seed(args.seed)
 	
 	state_dim = env.observation_space.shape[0]
+	print("state_dim: ", state_dim)
 	action_dim = 1 # env.action_space.shape[0] 
 	max_action = 0.0075 # float(env.action_space.high[0])
 

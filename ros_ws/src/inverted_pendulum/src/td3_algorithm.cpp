@@ -81,12 +81,12 @@ private:
   {
     // make a copy of state
     std::vector<float> state_copy = state;
-    state_copy[0] *= 5.0;
+    // state_copy[0] *= 5.0;
 
     // Create a vector of inputs.
     std::vector<torch::jit::IValue> inputs;
     // Turn state into a torch tensor
-    torch::Tensor state_tensor = torch::from_blob(state_copy.data(), {1, 4});
+    torch::Tensor state_tensor = torch::from_blob(state_copy.data(), {1, 6});
     inputs.push_back(state_tensor);
 
     // Execute the model and turn its output into a tensor.
@@ -109,8 +109,8 @@ private:
     // Log the input (state) to the network, as well as tthe output (output):
     RCLCPP_INFO(
       this->get_logger(), 
-      "State Copy='%0.2f %0.2f %0.2f %0.2f', Output='%0.2f'", 
-      state_copy[0], state_copy[1], state_copy[2], state_copy[3], output[0].item<float>()
+      "State Copy='%0.3f %0.5f %0.3f %0.5f %0.3f %0.5f', Output='%0.4f'", 
+      state_copy[0], state_copy[1], state_copy[2], state_copy[3], state_copy[4], state_copy[5], output[0].item<float>()
     );
 
     // RCLCPP_INFO(

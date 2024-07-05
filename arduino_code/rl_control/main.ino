@@ -26,7 +26,7 @@ int lastCount = -2000; // Variable to store previous encoder count
 bool atLimit = false;
 
 // uint8_t stepSize AndDir = B00000000; //00000001 is m0, 00000010 is ml, 00000100 is m2, 00001000 is dir.
-unsigned int stepPulseWidth = 2000; //in milliseconds
+unsigned int stepPulseWidth = 4000; //in milliseconds
 
 void setup() {
   DDRD = B11111000; // Direction register for Port A (some range of arduino digital pins); 0 = input, 1 = output...
@@ -139,11 +139,13 @@ void step_stepper_motor(float move, int numDelayMicroseconds) {
   // PORTA |= B00000100; // 12
   // PORTA |= B00000110; // 26
 
-  // Set the step pin high
-  PORTA |= B00010000;
-  delayMicroseconds(numDelayMicroseconds);
-  PORTA &= B11101111;
-  delayMicroseconds(numDelayMicroseconds);
+  if(!atLimit){
+    // Set the step pin high
+    PORTA |= B00010000;
+    delayMicroseconds(numDelayMicroseconds);
+    PORTA &= B11101111;
+    delayMicroseconds(numDelayMicroseconds); 
+  }
 }
 
 void loop() {
@@ -162,7 +164,8 @@ void loop() {
   
   // Read in the desired movement from the computer
   if (Serial.available() > 0) {
-    float move = read_float_from_serial();
+    float move_x = read_float_from_serial();
+    float move = -1 * move_x / (2 * 3.14 * 0.028 * 1.8 / 360.0); // ~num steps
 
     // Move the stepper motor
     step_stepper_motor(move, stepPulseWidth);
@@ -181,7 +184,6 @@ float read_float_from_serial() {
   }
   return input.toFloat();
 }
-
 
 void isrA() {
     // Interrupt service routine for encoder phase A

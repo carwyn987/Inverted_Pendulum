@@ -36,7 +36,7 @@ public:
         std::cerr << "Error opening " << portname << ": " << strerror(errno) << std::endl;
     }
 
-    if (set_serial_attributes(fd, B9600, 0) < 0) {
+    if (set_serial_attributes(fd, B115200, 0) < 0) {
         close(fd);
     }
 
@@ -44,7 +44,7 @@ public:
     comm_thread_ = std::thread([this] {
       while (true) {
         comm_loop();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
     });
 
@@ -61,7 +61,7 @@ private:
     // );
     // send_to_socket(sock, static_cast<float>(msg.data));
 
-    send_floats_to_serial(fd, static_cast<float>(msg.data));
+    send_floats_to_serial(fd, msg.data);
   }
 
   void comm_loop(){
