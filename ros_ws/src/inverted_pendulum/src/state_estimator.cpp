@@ -18,7 +18,7 @@ public:
     encoder_subscription_ = this->create_subscription<std_msgs::msg::Int16>(
       "encoder_pulse", 10, std::bind(&StateEstimator::encoder_pulse_callback, this, _1));
     stepper_subscription_ = this->create_subscription<std_msgs::msg::Float32>(
-      "inference", 10, std::bind(&StateEstimator::stepper_pulse_callback, this, _1));
+      "stepper_moved", 10, std::bind(&StateEstimator::stepper_pulse_callback, this, _1));
     absolute_state_publisher_ = this->create_publisher<geometry_msgs::msg::Pose2D>("absolute_state", 10);
   }
 
@@ -46,24 +46,12 @@ private:
 
   void stepper_pulse_callback(const std_msgs::msg::Float32 & msg)
   {
-    // Remember: msg.data from the stepper is a step, not absolute. We are tracking absolute x_pos
-    // msg.data is the step size, which can be either 1, 1/2, 1/4, 1/8, 1/16, or 1/32. Compute the equivalent distance:
-
-    // float applied_move = get_applied_move(msg.data); // in number of steps
-    // applied_move *= 1.8 / 360.0; // steps -> degrees -> now into percentage of a full rotation
-    // float radius = 0.028 * 16; // 4.8 cm :: 248 full steps = 1/2 distance 
-    // applied_move *= 2 * M_PI * radius; // now to distance
-    _x_pos += 0.5 * msg.data; // Convert to (?))
-
-    // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    // RCLCPP_INFO(
-    //   this->get_logger(), 
-    //   "!!!!!!!!!!!!!!!!!!!!!!!!! Received stepper pulse: '%f' at time '%u' for a new count of %f", 
-    //   msg.data, static_cast<uint>(now_sec), _x_pos
-    // );
+    // _x_pos += 0.5 * msg.data; // Convert to (?))
+    _x_pos = msg.data;
+    
 
     // delay to make sure the stepper motor has time to move
-    std::this_thread::sleep_for(std::chrono::milliseconds(9));
+    // std::this_thread::sleep_for(std::chrono::milliseconds(9));
     publish_absolute_state();
   }
 

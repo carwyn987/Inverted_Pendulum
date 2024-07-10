@@ -7,25 +7,26 @@ import torch.optim as optim
 from torch import nn
 from collections import deque
 import random
-from models.dqn import ReplayBufferInvPend, AgentInvPend, Action_Value_Network
+from preliminary_tests.models.dqn import ReplayBufferInvPend, AgentInvPend, Action_Value_Network
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 # Best guess at true environment parameters
 env = gym.make('CartPole-v1', 
-               gravity=9.80665,
-               masscart=0.4,
+               gravity=15,
+               masscart=0.2,
                masspole=0.4,
-               half_length=0.6,
+               half_length=0.5,
                force_mag=10.0,
                tau=0.01,
                theta_threshold_radians = 100*math.pi/3,
-               x_threshold=1,
+               x_threshold=1.0,
                init_x=0.0,
                init_x_dot=0.0,
-               init_theta= math.pi, # 0, # start in the upwards position
+               init_theta= 0.0, # 0, # start in the upwards position
                init_theta_dot=0.0,
-               perturbations=True
+               perturbations=True,
+			   damping=0.994
             #    render_mode="human",
             #    screen_width=800,
             #    screen_height=400)
@@ -41,21 +42,21 @@ def train(load_model):
     lr = 0.001
     gamma = 0.999
     sync_target_frequency = 2000
-    num_episodes = 1000
+    num_episodes = 2000
     max_steps = 1000
     epsilon = 1
     decay = 0.99996
     min_epsilon = 0.02
 
-    stop_if_avg_reward_is = 1000
+    stop_if_avg_reward_is = 9000
     num_samples_early_stopping_avg = 10
-    stop_if_instant_reward_is = 1500
+    stop_if_instant_reward_is = np.inf
 
-    actions = np.linspace(-1, 1, 21)
+    actions = np.array([-1.0, -1.0/2, -1.0/4, -1.0/8, -1.0/16, -1.0/32, 0, 1.0/32, 1.0/16, 1.0/8, 1.0/4, 1.0/2, 1.0], dtype=np.float32)
     num_actions = len(actions)
     observation_shapes = env.observation_space.shape[0]
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") # 
     print("Using device: ", device)
 
     # Initialize networks
@@ -162,8 +163,8 @@ def train(load_model):
     print("Total steps: ", total_steps, ", meaning epsilon got down to: ", epsilon)
 
     # Save the models
-    torch.save(behavior_model.state_dict(), 'preliminary_tests/model_weights/latency_2_behavioral_dqn.pth')
-    torch.save(target_model.state_dict(), 'preliminary_tests/model_weights/latency_2_target_dqn.pth')
+    torch.save(behavior_model.state_dict(), 'models/dqn_catcher/behavioral_dqn.pth')
+    torch.save(target_model.state_dict(), 'models/dqn_catcher/target_dqn.pth')
 
     plt.figure()
     plt.title('Episode vs Loss')

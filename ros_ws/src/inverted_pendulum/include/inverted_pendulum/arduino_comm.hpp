@@ -40,31 +40,56 @@ int set_serial_attributes(int fd, int speed, int parity) {
     return 0;
 }
 
+enum InputType {
+    NONE,
+    X_POSITION,
+    THETA
+};
 
-float read_floats_from_serial(int fd) {
+// Struct to hold the result of the serial read
+struct SerialResult {
+    InputType type;
+    float value;
+};
+
+// Function to read floats from serial
+SerialResult read_from_serial(int fd) {
     char buf;
     std::string data;
-    float value = -9999.0;
+    SerialResult result = {NONE, 0.0};
 
-    while (value == -9999.0) {
+    while (true) {
         int n = read(fd, &buf, 1);
         if (n > 0) {
-            if (buf == '\n') {
-                try {
-                    value = std::stof(data);
-                } catch (const std::invalid_argument& ia) {
-                    // Ignore invalid argument and reset data
+            if (buf == '\n' || buf == '\r') {
+                // Find the last 'x' or 'a' in the data
+                int lastX = data.rfind('x');
+                int lastT = data.rfind('a');
+                int pos = std::max(lastX, lastT);
+
+                if (pos >= 0) {
+                    char type = data[pos];
+                    std::string valueStr = data.substr(pos + 1);
+                    try {
+                        result.value = std::stof(valueStr);
+                        result.type = (type == 'x') ? X_POSITION : THETA;
+                    } catch (const std::invalid_argument& ia) {
+                        // Ignore invalid argument and reset data
+                        result.value = -1;
+                    }
                 }
                 data.clear(); // Clear the buffer for the next message
+                return result;
             } else {
                 data += buf;
             }
         } else if (n < 0) {
             std::cerr << "Error from read: " << strerror(errno) << std::endl;
+            throw std::runtime_error("Error reading from serial");
             break;
         }
     }
-    return value;
+    return result;
 }
 
 void send_floats_to_serial(int fd, float value) {

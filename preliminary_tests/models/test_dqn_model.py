@@ -2,8 +2,7 @@ import sys
 import gymnasium as gym
 import math
 import torch
-from models.dqn import ReplayBufferInvPend, AgentInvPend, Action_Value_Network
-from models.a2c import Policy_Network
+from preliminary_tests.models.dqn import ReplayBufferInvPend, AgentInvPend, Action_Value_Network
 from tqdm import tqdm
 import numpy as np
 import keyboard
@@ -11,20 +10,21 @@ import keyboard
 
 def setup_and_run(model_weights_path):
     env = gym.make('CartPole-v1', 
-                gravity=9.80665,
-                masscart=0.4,
+                gravity=15,
+                masscart=0.2,
                 masspole=0.4,
-                half_length=0.6,
+                half_length=0.5,
                 force_mag=10.0,
                 tau=0.01,
                 theta_threshold_radians = 100*math.pi/3,
-                x_threshold=1,
+                x_threshold=1.0,
                 init_x=0.0,
                 init_x_dot=0.0,
-                init_theta=math.pi, # start in the upwards position
-                init_theta_dot=np.random.uniform(-0.001, 0.001),
+                init_theta= 0.0, # 0, # start in the upwards position
+                init_theta_dot=0.0,
+                perturbations=True,
+                damping=0.994,
                 render_mode="human",
-                perturbations=False,
                 screen_width=800,
                 screen_height=400)
 
@@ -32,7 +32,7 @@ def setup_and_run(model_weights_path):
     epsilon = 0.0
     buffer_size = 0
 
-    actions = np.linspace(-1, 1, 21)
+    actions = np.array([-1.0, -1.0/2, -1.0/4, -1.0/8, -1.0/16, -1.0/32, 0, 1.0/32, 1.0/16, 1.0/8, 1.0/4, 1.0/2, 1.0], dtype=np.float32)
     num_actions = len(actions)
     observation_shapes = env.observation_space.shape[0]
 

@@ -9,7 +9,7 @@ import td3 as TD3
 
 
 env = gym.make('CartPole-v1', 
-               gravity=13,
+               gravity=15,
                masscart=0.2,
                masspole=0.4,
                half_length=0.5,
@@ -19,9 +19,10 @@ env = gym.make('CartPole-v1',
                x_threshold=1.0,
                init_x=0.0,
                init_x_dot=0.0,
-               init_theta= math.pi, # 0, # start in the upwards position
+               init_theta= 0.0, # 0, # start in the upwards position
                init_theta_dot=0.0,
                perturbations=True,
+               damping=0.994,
                render_mode="human",
                screen_width=800,
                screen_height=400)

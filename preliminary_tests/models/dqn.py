@@ -5,11 +5,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+action_values = np.array([-1.0, -1.0/2, -1.0/4, -1.0/8, -1.0/16, -1.0/32, 0, 1.0/32, 1.0/16, 1.0/8, 1.0/4, 1.0/2, 1.0], dtype=np.float32)
+
 def arrayIndexToActionValue(index):
-    return float(index-10)/10.0
+    # return float(index-10)/10.0
+    return action_values[index]
 
 def actionValueToArrayIndex(val):
-    return int(val[0] * 10) + 10
+    # return int(val[0] * 10) + 10
+    return np.argmin(np.abs(action_values - val))
 
 SingleExperience = namedtuple('SingleExperience', 
                               field_names = ['state','action','reward','done','nextstate'])

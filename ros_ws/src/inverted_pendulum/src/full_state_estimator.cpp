@@ -32,7 +32,7 @@ private:
     _current_x_pos = msg.x;
 
     // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    double now_sec = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 1e6);
+    // double now_sec = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() / 1e6);
 
     // Send full state
     std_msgs::msg::Float32MultiArray full_state_msg;
@@ -48,13 +48,26 @@ private:
     state_buffer.push_back(_current_x_pos);
     state_buffer.push_back(theta_radians);
 
-    full_state_msg.data = {state_buffer[0], state_buffer[1], state_buffer[2], state_buffer[3], state_buffer[4], state_buffer[5]}; // convert_to_float32_array(state_buffer);
-    
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "Adding to state buffer: x_pos='%f', theta='%f' at time '%f'",
+    //   _current_x_pos, theta_radians, now_sec
+    // );
+
+    auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     RCLCPP_INFO(
       this->get_logger(), 
-      "state_buffer='%f %f %f %f %f %f' at time '%f'", 
-      full_state_msg.data[0], full_state_msg.data[1], full_state_msg.data[2], full_state_msg.data[3], full_state_msg.data[4], full_state_msg.data[5], now_sec
+      "time '%u'",
+      static_cast<uint>(now_sec)
     );
+
+    full_state_msg.data = {state_buffer[0], state_buffer[1], state_buffer[2], state_buffer[3], state_buffer[4], state_buffer[5]}; // convert_to_float32_array(state_buffer);
+    
+    // RCLCPP_INFO(
+    //   this->get_logger(), 
+    //   "state_buffer='%f %f %f %f %f %f' at time '%f'", 
+    //   full_state_msg.data[0], full_state_msg.data[1], full_state_msg.data[2], full_state_msg.data[3], full_state_msg.data[4], full_state_msg.data[5], now_sec
+    // );
 
     full_state_publisher_->publish(full_state_msg);
   }

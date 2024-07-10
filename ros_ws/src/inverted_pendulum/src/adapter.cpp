@@ -24,6 +24,7 @@ public:
   : Node("simulated_encoder"), count_(0)
   {
     publisher_ = this->create_publisher<std_msgs::msg::Int16>("encoder_pulse", 10);
+    stepper_publisher_ = this->create_publisher<std_msgs::msg::Float32>("stepper_moved", 10);
 
     inference_subscriber_ = this->create_subscription<std_msgs::msg::Float32>(
       "inference", 10, std::bind(&CommunicationAdapter::forward_stepper_pulse, this, _1)
@@ -44,7 +45,8 @@ public:
     comm_thread_ = std::thread([this] {
       while (true) {
         comm_loop();
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // delay for 100 microseconds
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
       }
     });
 
@@ -65,46 +67,52 @@ private:
   }
 
   void comm_loop(){
-    // int encoder_status = -1;
-    // float encoder_data = 0;
-    // while (true){
-    //   encoder_status = receive_from_socket(sock, encoder_data);
+    // float value = read_floats_from_serial(fd);
+    float value = 0.0;
 
-    //   // Encoder data received --> send to encoder topic
-    //   if (encoder_status > 0){
-    //     send_encoder_data(encoder_data);
-    //   }
+    SerialResult result = read_from_serial(fd);
 
-    //   encoder_status = -1;
-    //   encoder_data = 0;
-    // }
-    float value = read_floats_from_serial(fd);
-    // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    // RCLCPP_INFO(
-    //   this->get_logger(), 
-    //   "Got encoder reading : '%f' at time '%u'", 
-    //   value, static_cast<uint>(now_sec)
-    // );
-    send_encoder_data(value);
+    if (result.type == X_POSITION) {
+      value = result.value;
+      send_stepper_move(value);
+
+      auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      RCLCPP_INFO(
+        this->get_logger(), 
+        "time '%u'",
+        static_cast<uint>(now_sec)
+      );
+
+      // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      // RCLCPP_INFO(
+      //   this->get_logger(), 
+      //   "Got stepper reading : '%f' at time '%u'", 
+      //   value, static_cast<uint>(now_sec)
+      // );
+
+    } else if (result.type == THETA) {
+      value = result.value;
+      send_encoder_data(value);
+    }
   }
 
   void send_encoder_data(float data)
   {
     std_msgs::msg::Int16 msg;
     msg.data = static_cast<int>(data);
-    
-    // auto now_sec = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    // RCLCPP_INFO(
-    //   this->get_logger(), 
-    //   "Publishing: '%d' at time '%u'", 
-    //   msg.data, static_cast<uint>(now_sec)
-    // );
-
     publisher_->publish(msg);
+  }
+
+  void send_stepper_move(float data)
+  {
+    std_msgs::msg::Float32 msg;
+    msg.data = data;
+    stepper_publisher_->publish(msg);
   }
 
   std::thread comm_thread_;
   rclcpp::Publisher<std_msgs::msg::Int16>::SharedPtr publisher_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr stepper_publisher_;
   rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr inference_subscriber_;
   size_t count_;
 
