@@ -1,13 +1,23 @@
-*VIDEOS DOWN BELOW! (Consider this statement the hook)*
-
 # Inverted-Pendulum Project
+
+
 
 ## What is an inverted pendulum?
 An [inverted pendulum](https://en.wikipedia.org/wiki/Inverted_pendulum) is a dynamic system with the center of mass above its pivot point, generally constrained to one rotational degree of freedom. While a pendulum is stable, inverting a pendulum requires active balancing applied to it. Generally, this is performed by applying torque to the pendulum directly, or shifting the base longitudinally.
 
 ## History of Project
 
-### Most Recent Updates
+### Postsite / Retrospective Analysis
+
+Reinforcement learning is ***INCREDIBLY CHALLENGING*** to transfer from simulation to reality - especially if you don't know the dynamics of the environment. 
+
+The biggest difficulty was matching my simulation to the environment:
+ - Most inverted pendulum simulations (CartPole-v1 from gymnasium) have force as the input quantity. My hardware used a stepper motor, with discrete choices for step sizes and timing. 
+ - Due to the stepper motor, I also was constrained to a maximum speed.
+ - The default parameters for the gymnasium environment do not seem to map to true dynamics. It seemed like my pendulum fell much faster than the simulation  rod.
+ - Traditional methods such as PID control loops are well known for a reason - they work, are simple to set up. The only annoyance is tuning.
+
+### Presite Updates
 
 DQN Model balances pendulum, but cannot converge from hanging (stable) initialization in a reasonable amount of time and resources.
 
