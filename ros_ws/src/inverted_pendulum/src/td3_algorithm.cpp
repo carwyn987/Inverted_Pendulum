@@ -80,31 +80,23 @@ private:
 
   void publish_inference(std::vector<float> state)
   {
-
-    // Log the input (state) to the network, as well as tthe output (output):
-    // RCLCPP_INFO(
-    //   this->get_logger(), 
-    //   "State Copy='%0.3f %0.5f %0.3f %0.5f %0.3f %0.5f', Output='%0.4f'", 
-    //   state_copy[0], state_copy[1], state_copy[2], state_copy[3], state_copy[4], state_copy[5], output[0].item<float>()
-    // );
-
-
     std_msgs::msg::Float32 msg;
 
-    if (state[4] < -2.0 || state[4] > 2.0) {
+    if (state[4] < -3.0 || state[4] > 3.0) {
       state[4] = 0.0;
     }
 
-    // Print the state in one line
-    std::string state_str;
-    for (float value : state) {
-      state_str += std::to_string(value) + " ";
-    }
-    RCLCPP_INFO(
-      this->get_logger(),
-      "State: '%s'",
-      state_str.c_str()
-    );
+    print_fullstate(state);
+
+    // ENERGY
+    float gravity = 9.81;
+    float length = 1;
+    float w = (state[5] - state[1]) / 0.01; // angular velocity
+    float theta = fmod(state[5], 2 * M_PI) + (state[5] - state[1]); // future estimate of theta
+    float desired_energy = gravity * length / 2.0;
+    float rotational_energy = 0.5 * (1.0 / 3.0) * length * length * w * w;
+    float potential_energy = gravity * (length / 2.0) * sin((M_PI / 2.0) - theta);
+    float total_energy = rotational_energy + potential_energy;
 
     // CUSTOM SWING UP CODE:
     float angle_mod_2pi = fmod(state[5], 2 * M_PI);
@@ -114,18 +106,39 @@ private:
 
     if (angle_mod_2pi < rl_takeover || angle_mod_2pi > 2 * M_PI - rl_takeover) {
       
-      // PID way
-      float proportional_coefficient = 60.0;
-      float integral_coefficient = 1.0;
-      float derivative_coefficient = 30.0;
-      // float x_change_desired_angle = 0.1;
+      // PID coefficients for the angle
+      float proportional_coefficient = 70.0;
+      float integral_coefficient = 0.5;
+      float derivative_coefficient = 80.0;
+      
+      // PID for the desired angle offset (based off of x position)
+      float P_desired_angle = 0.03;
+      float I_desired_angle = 0.00001; // 0.00001
+      float D_desired_angle = 0.0005;
+      float x_error = state[4];
+      // only add to the error integral if we are close
+      if (abs(angle_mod_2pi < 0.1) || abs(angle_mod_2pi > 2 * M_PI - 0.1)){
+        desired_x_error_integral += x_error;
+      }
+      float x_error_derivative = x_error - x_lasterror;
+      x_lasterror = x_error;
+      float desired_angle_offset = P_desired_angle * x_error + I_desired_angle * desired_x_error_integral + D_desired_angle * x_error_derivative;
+
+      RCLCPP_INFO(
+        this->get_logger(),
+        "x_error: '%.4f', x_error_derivative: '%.4f', x_error_integral: '%.4f'",
+        x_error, x_error_derivative, desired_x_error_integral
+      );
+
 
       float desired_angle = 0.0;
       // keep centered on x:
-      float distance_to_center = state[4];
-      if (abs(distance_to_center) > 0.05) {
-        desired_angle = distance_to_center/abs(distance_to_center) * 0.01; // distance_to_center * x_change_desired_angle;
-      }
+      // float distance_to_center = state[4];
+      // if (abs(distance_to_center) > 0.05) {
+      //   desired_angle = distance_to_center/abs(distance_to_center) * 0.003; // distance_to_center * x_change_desired_angle;
+      // }
+      // SECOND PID REPLACEMENT
+      desired_angle = desired_angle_offset;
 
       float error = desired_angle - state[5];
       if (error < -1 * M_PI){
@@ -144,11 +157,11 @@ private:
       msg.data = proportional_coefficient * error + integral_coefficient * error_integral + derivative_coefficient * error_derivative;
 
       // stop from hitting ends
-      if (state[4] > 0.17 && msg.data > 0){
-        msg.data = 0.0;
-      } else if (state[4] < -0.17 && msg.data < 0){
-        msg.data = 0.0;
-      }
+      // if (state[4] > 0.2 && msg.data > 0){
+      //   msg.data = 0.0;
+      // } else if (state[4] < -0.2 && msg.data < 0){
+      //   msg.data = 0.0;
+      // }
 
       // print the error values
       RCLCPP_INFO(
@@ -178,47 +191,24 @@ private:
       msg.data = -1.0 * output[0].item<float>();
       */
 
-      /*
+
       // Energy Way (no mass)
 
       // Print all state values inline
-      std::string state_values;
-      for (float value : state) {
-        state_values += std::to_string(value) + " ";
-      }
-      RCLCPP_INFO(
-        this->get_logger(),
-        "State values: '%s'",
-        state_values.c_str()
-      );
+      // std::string state_values;
+      // for (float value : state) {
+      //   state_values += std::to_string(value) + " ";
+      // }
+      // RCLCPP_INFO(
+      //   this->get_logger(),
+      //   "State values: '%s'",
+      //   state_values.c_str()
+      // );
 
       // Energy Way (no mass)
-      float gravity = 9.81;
-      float length = 1;
-      float w = (state[5] - state[1]) / 0.010; // angular velocity
-      
-      float w_dir = 0;
-      if (abs(w) > 0.0001){
-        w_dir = (w / fabs(w));
-      }
-      
-      float epsilon = 0.0;
-      float theta = fmod(state[5], 2 * M_PI) + (state[5] - state[1]); // future estimate of theta
-      int theta_dir = 0;
-      if (state[5] > 0 && state[5] < M_PI * 0.5) {
-          theta_dir = 1;
-      } else if (state[5] > M_PI * 1.5 && state[5] < M_PI * 2) {
-          theta_dir = -1;
-      }
-
-
-      float desired_energy = gravity * length / 2.0;
-      float rotational_energy = 0.5 * (1.0 / 3.0) * length * length * w * w;
-      float potential_energy = gravity * (length / 2.0) * sin((M_PI / 2.0) - theta);
-      bool rotating_towards_top = (theta > 0 && theta < M_PI / 2 && w < 0) || (theta <= 2 * M_PI && theta > 1.5 * M_PI && w > 0);
 
       // float scale_by_energy_off = 1.0 / 2.0;
-
+      /*
       if (rotating_towards_top) {
           float total_energy = potential_energy + rotational_energy;
           if (desired_energy - total_energy > epsilon) { // we need more energy
@@ -245,14 +235,16 @@ private:
     } else if (angle_mod_2pi > (1.5 - radians_from_horiz) * M_PI && angle_mod_2pi < (1.5 + radians_from_horiz) * M_PI && abs(state[4]) > distance_to_recenter){
       // move to the center
       msg.data = -1.0 * state[4]/abs(state[4]);
+    } else if (total_energy > desired_energy) { // we have too much energy.
+      msg.data = 0.0;
     } else if (angle_mod_2pi <= M_PI * 0.5) {
-      msg.data = -1.0;
+      msg.data = 0.0; // -1.0;
     } else if (angle_mod_2pi < M_PI && angle_mod_2pi >= M_PI * 0.5) {
       msg.data = 1.0;
     } else if (angle_mod_2pi > M_PI && angle_mod_2pi <= 1.5 * M_PI) {
       msg.data = -1.0;
     } else if (angle_mod_2pi >= 1.5 * M_PI && angle_mod_2pi < 2 * M_PI) {
-      msg.data = 1.0;
+      msg.data = 0.0; // 1.0;
     } else {
       msg.data = 0.0;
       RCLCPP_INFO(
@@ -277,6 +269,20 @@ private:
     // send_to_socket(sock, output[0].item<float>());
   }
 
+  void print_fullstate(std::vector<float> state)
+  {
+    // Print the state in one line
+    std::string state_str;
+    for (float value : state) {
+      state_str += std::to_string(value) + " ";
+    }
+    RCLCPP_INFO(
+      this->get_logger(),
+      "State: '%s'",
+      state_str.c_str()
+    );
+  }
+
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr full_state_subscription_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr inference_publisher_;
 
@@ -285,6 +291,9 @@ private:
 
   float error_integral = 0.0;
   float lasterror = 0.0;
+
+  float desired_x_error_integral = 0.0;
+  float x_lasterror = 0.0;
 
   std::vector<float> last_state = {0.0, 0.0, 0.0, 0.0};
 };
