@@ -7,6 +7,10 @@ An [inverted pendulum](https://en.wikipedia.org/wiki/Inverted_pendulum) is a dyn
 
 ## History of Project
 
+### Final TD3 Performance
+
+https://github.com/user-attachments/assets/6cc0a676-86f2-4fd9-accb-2f986fe4a135
+
 ### Postsite / Retrospective Analysis
 
 Reinforcement learning is ***INCREDIBLY CHALLENGING*** to transfer from simulation to reality - especially if you don't know the dynamics of the environment. 
